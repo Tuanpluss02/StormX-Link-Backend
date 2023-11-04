@@ -11,7 +11,7 @@ import { MongooseModule } from "@nestjs/mongoose";
       isGlobal: true,
       envFilePath: ".env",
     }),
-    MongooseModule.forRoot(process.env.MONGODB_URI),
+    MongooseModule.forRoot("mongodb://root:admin@localhost:27017", { dbName: "url-shortener" }),
     AuthModule,
     UserModule,
     UrlModule,
