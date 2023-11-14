@@ -7,5 +7,5 @@ export class UpdateUrlDTO {
 
   @IsString()
   @IsAlphanumeric()
-  readonly urlCode?: string;
+  readonly urlCode: string;
 }
