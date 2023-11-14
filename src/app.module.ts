@@ -2,8 +2,8 @@ import { Module } from "@nestjs/common";
 import { AuthModule } from "./auth/auth.module";
 import { UserModule } from "./user/user.module";
 import { UrlModule } from "./url/url.module";
-import { ConfigModule } from "@nestjs/config";
 import { MongooseModule } from "@nestjs/mongoose";
+import { ConfigModule } from "@nestjs/config";
 
 @Module({
   imports: [
@@ -11,7 +11,9 @@ import { MongooseModule } from "@nestjs/mongoose";
       isGlobal: true,
       envFilePath: ".env",
     }),
-    MongooseModule.forRoot("mongodb://root:admin@localhost:27017", { dbName: "url-shortener" }),
+    MongooseModule.forRoot(
+      process.env.MONGO_URI,{dbName: process.env.MONGO_DB_NAME}
+    ),
     AuthModule,
     UserModule,
     UrlModule,
