@@ -3,7 +3,9 @@ import { JwtService } from "./jwt.service";
 import { InjectModel } from "@nestjs/mongoose";
 import { User } from "src/user/interfaces/user.interface";
 import { Model } from "mongoose";
-import { AuthDto } from "./dto/auth.dto";
+import { RegisterDTO } from "./dto/register.dto";
+import { LoginDTO } from "./dto/login.dto";
+import { PasswordUtil } from "src/utilities/passwordUltil";
 
 @Injectable({})
 export class AuthService {
@@ -12,28 +14,59 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async register(authDto: AuthDto) {
-    const userExist = await this.userModel.findOne({
-      username: authDto.username,
-    });
-    if (userExist) {
+  async register(registerDTO: RegisterDTO) {
+    try {
+      const userExist = await this.userModel.findOne({
+        username: registerDTO.username,
+      });
+      if (userExist) {
+        return {
+          message: "User already exist",
+        };
+      }
+      const plainPassword = registerDTO.password;
+      const hashedPassword = await PasswordUtil.hashPassword(plainPassword);
+      const newUser = new this.userModel({
+        username: registerDTO.username,
+        password: hashedPassword,
+      });
+      await newUser.save();
+      return await this.jwtService.createToken(newUser);
+    } catch (error) {
       return {
-        message: "User already exist",
+        message: "Something went wrong",
+        error: error,
       };
     }
-    const user = await this.userModel.create(authDto);
-    return await this.jwtService.createToken(user);
   }
 
-  async login(authDto: AuthDto) {
-    const user = await this.userModel.findOne({
-      username: authDto.username,
-    });
-    if (!user) {
+  async login(loginDTO: LoginDTO) {
+    try {
+      const user = await this.userModel.findOne({
+        username: loginDTO.username,
+      });
+      if (!user) {
+        return {
+          message: "User not found",
+        };
+      }
+      const checkPassword = await PasswordUtil.comparePassword(
+        loginDTO.password,
+        user.password,
+      );
+      console.log(user);
+
+      if (!checkPassword) {
+        return {
+          message: "Username or password invalid",
+        };
+      }
+      return await this.jwtService.createToken(user);
+    } catch (error) {
       return {
-        message: "User not found",
+        message: "Something went wrong",
+        error: error,
       };
     }
-    return await this.jwtService.createToken(user);
   }
 }
