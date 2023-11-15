@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { NewUrlDTO } from './dto/new-url.dto';
 import { UrlService } from './url.service';
@@ -14,6 +14,9 @@ export class UrlController {
 
     @Get(':urlCode(*)')
     async gotoUrl(@Param('urlCode') urlCode: string, @Res() res: Response) {
+        if(!urlCode){
+            return res.redirect(process.env.FRONTEND_URL);
+        }
         const result =  await this.urlService.getLongUrl(urlCode);
         if(result.url){
             return res.redirect(result.url);
