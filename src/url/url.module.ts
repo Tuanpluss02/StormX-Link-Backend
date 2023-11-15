@@ -6,7 +6,7 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { UrlSchema } from "./schemas/url.schema";
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: "Url", schema: UrlSchema }])],
+  imports: [MongooseModule.forFeature([{ name: "URL", schema: UrlSchema }])],
   providers: [UrlService],
   controllers: [UrlController],
 })
