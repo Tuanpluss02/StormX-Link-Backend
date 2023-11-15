@@ -4,6 +4,9 @@ import { UserModule } from "./modules/user/user.module";
 import { UrlModule } from "./modules/url/url.module";
 import { MongooseModule } from "@nestjs/mongoose";
 import { ConfigModule } from "@nestjs/config";
+import { UserController } from './modules/user/user.controller';
+import { config } from "./config/configuration";
+// import  {ConfigurationService}  from "./config/configuration";
 
 @Module({
   imports: [
@@ -11,12 +14,13 @@ import { ConfigModule } from "@nestjs/config";
       isGlobal: true,
       envFilePath: ".env",
     }),
-    MongooseModule.forRoot(
-      process.env.MONGO_URI,{dbName: process.env.MONGO_DB_NAME}
-    ),
+    // MongooseModule.forRoot(
+    //   config. ,{dbName: process.env.MONGO_DB_NAME}
+    // ),
     AuthModule,
     UserModule,
     UrlModule,
   ],
+  controllers: [UserController],
 })
 export class AppModule { }

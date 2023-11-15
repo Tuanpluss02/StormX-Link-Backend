@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, NotFoundException, Redirect } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, NotFoundException, Redirect } from "@nestjs/common";
 import { Model } from "mongoose";
 import { Url } from "../../entities/url.entity";
 import { InjectModel } from "@nestjs/mongoose";
@@ -9,7 +9,7 @@ import { iResponse } from "src/utilities/responseHandle";
 
 @Injectable()
 export class UrlService {
-  constructor(@InjectModel("URL") private readonly urlModel: Model<Url>) {}
+  constructor(@InjectModel(Url.name) private readonly urlModel: Model<Url>) {}
 
   async createUrl(newUrlDTO: NewUrlDTO) {
     try {
@@ -17,24 +17,16 @@ export class UrlService {
       if(urlCode){
         const isAvailable = await this.urlModel.findOne({urlCode: newUrlDTO.urlCode});
       if(isAvailable){
-        return {
-          message: "URL Code is already taken!",
-        }
+        return new HttpException('URL Code is already taken!', HttpStatus.BAD_REQUEST);
       }
       }else{
         urlCode = crypto.randomBytes(8).toString("hex");
       }
       const newUrl = new this.urlModel({...newUrlDTO, urlCode: urlCode});
       await newUrl.save();
-      return {
-        message: "URL Created Successfully!",
-        url: newUrl,
-      };
+      return iResponse(HttpStatus.OK, "URL Created Successfully!", newUrl)
     } catch (error) {
-      return {
-        message: "Something went wrong!",
-        errors: error,
-      }
+      return iResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong!", error)
     }
   }
   async getLongUrl(urlCode: string) {
@@ -45,10 +37,7 @@ export class UrlService {
       }
       return { url: url.longUrl };
     } catch (error) {
-      return {
-        message: 'Something went wrong!',
-        errors: error,
-      };
+      throw iResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong!", error)
     }
   }
   async getAllUrls() {
@@ -56,10 +45,7 @@ export class UrlService {
       const urls = await this.urlModel.find();
       return urls;
     } catch (error) {
-      return {
-        message: "Something went wrong!",
-        errors: error,
-      }
+      throw iResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong!", error)
     }
   }
 
@@ -72,7 +58,7 @@ export class UrlService {
       await this.urlModel.deleteOne({_id: id});
       return iResponse(HttpStatus.OK, "URL Deleted Successfully!")
     } catch (error) {
-      return iResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong!", error)
+      throw iResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong!", error)
     }
   }
 

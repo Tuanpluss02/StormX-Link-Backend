@@ -13,7 +13,7 @@ export class User extends Document {
   password: string;
 
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Url' }] })
-  urls: Url[];
+  urls: mongoose.Types.ObjectId[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

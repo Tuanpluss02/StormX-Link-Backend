@@ -1,11 +1,12 @@
-import * as process from 'process';
+import { ConfigService } from '@nestjs/config';
 
-export default () => {
-  return {
-    port: parseInt(process.env.PORT, 10) || 3000,
-    database: {
-        mongoUri: process.env.MONGO_URI,
-        mongoDbName: process.env.MONGO_DB_NAME,
-    },
-  };
-};
+export const config = (configService: ConfigService) => ({
+  mongoUri: configService.get<string>('MONGO_URI'),
+  mongoDbName: configService.get<string>('MONGO_DB_NAME'),
+  mongoUser: configService.get<string>('MONGO_USER'),
+  mongoPassword: configService.get<string>('MONGO_PASSWORD'),
+  baseShortUrl: configService.get<string>('BASE_SHORT_URL'),
+  frontendUrl: configService.get<string>('FRONTEND_URL'),
+  secretKey: configService.get<string>('SECRET_KEY'),
+  accessTokenExpires: configService.get<string>('ACCESS_TOKEN_EXPIRES'),
+});
