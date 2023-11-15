@@ -9,9 +9,6 @@ export class AuthController {
   constructor(private authService: AuthService) {}
   @Post("register")
   async register(@Body() registerDTO: RegisterDTO) {
-    const plainPassword = registerDTO.password;
-    const hashedPassword = await PasswordUtil.hashPassword(plainPassword);
-
     return await this.authService.register(registerDTO);
   }
   @Post("login")

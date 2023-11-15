@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException, Redirect } from "@nestjs/common";
+import { HttpStatus, Injectable, NotFoundException, Redirect } from "@nestjs/common";
 import { Model } from "mongoose";
 import { Url } from "../../entities/url.entity";
 import { InjectModel } from "@nestjs/mongoose";
 import { NewUrlDTO } from "./dto/new-url.dto";
 import * as crypto from 'crypto';
 import { UpdateUrlDTO } from "./dto/update-url.dto";
+import { iResponse } from "src/utilities/responseHandle";
 
 @Injectable()
 export class UrlService {
@@ -62,23 +63,16 @@ export class UrlService {
     }
   }
 
-  async deteleUrl(urlCode: string) {
+  async deteleUrl(id: string) {
     try{
-      const url = await this.urlModel.findOne({urlCode});
+      const url = await this.urlModel.findById(id);
       if(!url){
-        return {
-          message: "Invalid URL",
-        }
+        return new NotFoundException('URL not found.');
       }
-      await this.urlModel.deleteOne({urlCode});
-      return {
-        message: "URL Deleted Successfully!",
-      }
+      await this.urlModel.deleteOne({_id: id});
+      return iResponse(HttpStatus.OK, "URL Deleted Successfully!")
     } catch (error) {
-      return {
-        message: "Something went wrong!",
-        errors: error,
-      }
+      return iResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong!", error)
     }
   }
 
@@ -86,9 +80,7 @@ export class UrlService {
     try {
       const existingUrl = await this.urlModel.findById(id);
       if(!existingUrl){
-        return {
-          message: "Invalid ID",
-        }
+        return new NotFoundException('URL not found.');
       }
 
     if (!updateUrlDTO.newUrlCode) {
@@ -96,9 +88,7 @@ export class UrlService {
     }else {
       const isUnavailable = await this.urlModel.findOne({urlCode: updateUrlDTO.newUrlCode});
       if(isUnavailable){
-        return {
-          message: "URL Code is already taken!",
-        }
+        return iResponse(HttpStatus.BAD_REQUEST, "URL Code is already taken!")
       }
       existingUrl.urlCode = updateUrlDTO.newUrlCode;
     }
@@ -106,14 +96,9 @@ export class UrlService {
       existingUrl.longUrl = updateUrlDTO.newLongUrl;
     }
     await existingUrl.save();
-    return {
-      message: "URL Updated Successfully!",
-      url: existingUrl,};
+    return 
     } catch (error) {
-      return {
-        message: "Something went wrong!",
-        errors: error,
-      }
+      return iResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong!", error)
     }
   }
 }

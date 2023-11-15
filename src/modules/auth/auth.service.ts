@@ -1,11 +1,12 @@
-import { Injectable } from "@nestjs/common";
-import { JwtService } from "./jwt.service";
+import { HttpException, HttpStatus, Injectable, UnauthorizedException } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
 import { InjectModel } from "@nestjs/mongoose";
 import { User } from "src/entities/user.entity";
 import { Model } from "mongoose";
 import { RegisterDTO } from "./dto/register.dto";
 import { LoginDTO } from "./dto/login.dto";
 import { PasswordUtil } from "src/utilities/passwordUltil";
+import { iResponse } from "src/utilities/responseHandle";
 
 @Injectable({})
 export class AuthService {
@@ -20,9 +21,7 @@ export class AuthService {
         username: registerDTO.username,
       });
       if (userExist) {
-        return {
-          message: "User already exist",
-        };
+        return iResponse(HttpStatus.BAD_REQUEST, "User already exists");
       }
       const plainPassword = registerDTO.password;
       const hashedPassword = await PasswordUtil.hashPassword(plainPassword);
@@ -31,12 +30,11 @@ export class AuthService {
         password: hashedPassword,
       });
       await newUser.save();
-      return await this.jwtService.createToken(newUser);
+      const payload = { sub: newUser.id, username: newUser.username };
+      const token = await this.jwtService.signAsync(newUser);
+      return iResponse(HttpStatus.CREATED, "User created successfully", token);
     } catch (error) {
-      return {
-        message: "Something went wrong",
-        error: error,
-      };
+      return new HttpException("Something went wrong", HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -46,27 +44,19 @@ export class AuthService {
         username: loginDTO.username,
       });
       if (!user) {
-        return {
-          message: "User not found",
-        };
+        return new UnauthorizedException('Invalid username or password');
       }
       const checkPassword = await PasswordUtil.comparePassword(
         loginDTO.password,
         user.password,
       );
-      console.log(user);
-
       if (!checkPassword) {
-        return {
-          message: "Username or password invalid",
-        };
+        return new UnauthorizedException('Invalid username or password');
       }
-      return await this.jwtService.createToken(user);
+      const token = await this.jwtService.signAsync(user);
+      return iResponse(HttpStatus.OK, "Login successfully", token);
     } catch (error) {
-      return {
-        message: "Something went wrong",
-        error: error,
-      };
+      return new HttpException("Something went wrong", HttpStatus.BAD_REQUEST);
     }
   }
 }

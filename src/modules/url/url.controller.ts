@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { NewUrlDTO } from './dto/new-url.dto';
 import { UrlService } from './url.service';
@@ -21,7 +21,7 @@ export class UrlController {
         if(result.url){
             return res.redirect(result.url);
         }
-        return res.status(404).json(result);
+        return new HttpException('Url not found', HttpStatus.NOT_FOUND);
     }
 
     @Get('url/getAll')
@@ -32,5 +32,9 @@ export class UrlController {
     @Patch('url/update/:id')
     async updateUrl(@Param('id') id: string, @Body() updateUrlDTO :UpdateUrlDTO) {
         return await this.urlService.updateUrl(id, updateUrlDTO);
+    }
+    @Delete('url/delete/:id')
+    async deleteUrl(@Param('id') id: string) {
+        return await this.urlService.deteleUrl(id);
     }
 }
