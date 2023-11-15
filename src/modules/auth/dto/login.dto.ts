@@ -1,10 +1,4 @@
-import {
-  IsAlphanumeric,
-  IsNotEmpty,
-  IsStrongPassword,
-  MaxLength,
-  MinLength,
-} from "class-validator";
+import { IsAlphanumeric, IsNotEmpty } from "class-validator";
 
 export class LoginDTO {
   @IsNotEmpty()
