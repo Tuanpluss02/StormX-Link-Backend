@@ -1,10 +1,8 @@
-import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Res } from '@nestjs/common';
 import { Response } from 'express';
-import { Model } from 'mongoose';
-import { Url } from './interfaces/url.interface';
-import { InjectModel } from '@nestjs/mongoose';
 import { NewUrlDTO } from './dto/new-url.dto';
 import { UrlService } from './url.service';
+import { UpdateUrlDTO } from './dto/update-url.dto';
 
 @Controller()
 export class UrlController {
@@ -21,5 +19,15 @@ export class UrlController {
             return res.redirect(result.url);
         }
         return res.status(404).json(result);
+    }
+
+    @Get('url/getAll')
+    async getAllUrls() {
+        return await this.urlService.getAllUrls();
+    }
+
+    @Patch('url/update/:id')
+    async updateUrl(@Param('id') id: string, @Body() updateUrlDTO :UpdateUrlDTO) {
+        return await this.urlService.updateUrl(id, updateUrlDTO);
     }
 }

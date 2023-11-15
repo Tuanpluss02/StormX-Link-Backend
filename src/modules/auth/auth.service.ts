@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { JwtService } from "./jwt.service";
 import { InjectModel } from "@nestjs/mongoose";
-import { User } from "src/user/interfaces/user.interface";
+import { User } from "src/entities/user.entity";
 import { Model } from "mongoose";
 import { RegisterDTO } from "./dto/register.dto";
 import { LoginDTO } from "./dto/login.dto";
