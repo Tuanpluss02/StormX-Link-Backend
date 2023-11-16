@@ -10,7 +10,7 @@ import { JwtStrategy } from "../auth/strategies/jwt.strategy";
 
 @Module({
   imports: [MongooseModule.forFeature([{ name: Url.name, schema: UrlSchema }]),],
-  providers: [UrlService, AppConfig,],
+  providers: [UrlService, AppConfig, JwtStrategy],
   controllers: [UrlController],
 })
 export class UrlModule { }

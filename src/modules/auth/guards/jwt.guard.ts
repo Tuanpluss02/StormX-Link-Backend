@@ -1,11 +1,12 @@
 import { Injectable, CanActivate, ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { JwtStrategy } from '../strategies/jwt.strategy';
+import { log } from 'console';
 
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService,
+  constructor(private jwtService: JwtService, private jwtStrategy: JwtStrategy
   ) { }
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
@@ -21,7 +22,7 @@ export class JwtAuthGuard implements CanActivate {
       request.payload = decoded;
       return true;
     } catch (err) {
-      throw new HttpException('Token invalid', HttpStatus.UNAUTHORIZED);
+      throw new HttpException(err, HttpStatus.UNAUTHORIZED);
     }
   }
 }

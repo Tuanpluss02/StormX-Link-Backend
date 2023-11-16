@@ -57,7 +57,7 @@ export class AuthService {
   async validateUser(payload: any) {
     const user = await this.userService.getUserById(payload.sub);
     if (!user) {
-      throw new UnauthorizedException("Invalid token");
+      throw new UnauthorizedException("User not found");
     }
     return user;
   }
