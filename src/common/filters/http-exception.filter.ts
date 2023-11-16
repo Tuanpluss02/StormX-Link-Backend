@@ -6,7 +6,7 @@ import {
   Logger,
 } from "@nestjs/common";
 import e, { Request, Response } from "express";
-import { ValidationError } from "class-validator";
+
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {

@@ -12,7 +12,8 @@ import { UrlService } from "../url/url.service";
     MongooseModule.forFeature([{ name: Url.name, schema: UrlSchema }]),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
-  providers: [UserService]
+  providers: [UserService],
+  exports: [UserService],
 
 })
-export class UserModule {}
+export class UserModule { }

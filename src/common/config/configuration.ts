@@ -1,7 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 
 export class AppConfig {
-  constructor(private configService: ConfigService) {}
+  constructor(private configService: ConfigService) { }
 
   getMongoUri(): string {
     return this.configService.get<string>('MONGO_URI');
@@ -17,10 +17,6 @@ export class AppConfig {
 
   getMongoPassword(): string {
     return this.configService.get<string>('MONGO_PASSWORD');
-  }
-
-  getBaseShortUrl(): string {
-    return this.configService.get<string>('BASE_SHORT_URL');
   }
 
   getFrontendUrl(): string {
