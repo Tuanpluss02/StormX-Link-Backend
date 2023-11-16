@@ -23,9 +23,9 @@ export class UrlController {
   constructor(
     private readonly urlService: UrlService,
     private readonly appconfig: AppConfig,
-  ) {}
+  ) { }
 
-  @Post("url/create")
+  @Post("api/v1/url/create")
   @UseGuards(JwtAuthGuard)
   async createUrl(@Body() newUrlDTO: NewUrlDTO, response: Response) {
     const ressult = await this.urlService.createUrl(newUrlDTO);
@@ -43,18 +43,18 @@ export class UrlController {
     return new HttpException("Url not found", HttpStatus.NOT_FOUND);
   }
 
-  // @Get('url/getAll')
+  // @Get('api/v1/url/getAll')
   // @UseGuards(JwtAuthGuard)
   // async getAllUrls() {
   //     return await this.urlService.getAllUrls();
   // }
 
-  // @Patch('url/update/:id')
+  // @Patch('api/v1/url/update/:id')
   // @UseGuards(JwtAuthGuard)
   // async updateUrl(@Param('id') id: string, @Body() updateUrlDTO :UpdateUrlDTO) {
   //     return await this.urlService.updateUrl(id, updateUrlDTO);
   // }
-  // @Delete('url/delete/:id')
+  // @Delete('api/v1/url/delete/:id')
   // @UseGuards(JwtAuthGuard)
   // async deleteUrl(@Param('id') id: string) {
   //     return await this.urlService.deteleUrl(id);

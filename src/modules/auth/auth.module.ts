@@ -9,9 +9,9 @@ import { Url, UrlSchema } from "src/entities/url.entity";
 import { AppConfig } from "src/common/config/configuration";
 import { PassportModule } from "@nestjs/passport";
 import { UserModule } from "../user/user.module";
+import { JwtStrategy } from "./strategies/jwt.strategy";
 @Module({
   imports: [
-    UserModule,
     PassportModule.register({ defaultStrategy: "jwt" }),
     JwtModule.register({
       global: true,
@@ -22,6 +22,6 @@ import { UserModule } from "../user/user.module";
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, UserService, JwtService, AppConfig],
+  providers: [AuthService, UserService, JwtService, AppConfig, JwtStrategy],
 })
 export class AuthModule { }

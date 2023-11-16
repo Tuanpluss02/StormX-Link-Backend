@@ -6,6 +6,7 @@ import { User, UserSchema } from "src/entities/user.entity";
 import { Url, UrlSchema } from "src/entities/url.entity";
 import { UrlModule } from "../url/url.module";
 import { UrlService } from "../url/url.service";
+import { AuthModule } from "../auth/auth.module";
 
 @Module({
   imports: [
@@ -14,6 +15,5 @@ import { UrlService } from "../url/url.service";
   ],
   providers: [UserService],
   exports: [UserService],
-
 })
 export class UserModule { }

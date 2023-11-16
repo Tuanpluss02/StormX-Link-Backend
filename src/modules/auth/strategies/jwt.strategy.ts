@@ -8,12 +8,13 @@ import { AuthService } from "../auth.service";
 import { AppConfig } from "src/common/config/configuration";
 import { PassportStrategy } from "@nestjs/passport";
 
-@Injectable()
+@Injectable({})
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
     private readonly authService: AuthService,
     private readonly appConfig: AppConfig,
+
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

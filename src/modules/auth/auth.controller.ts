@@ -5,7 +5,7 @@ import { LoginDTO } from "./dto/login.dto";
 import { Response } from "express";
 import { iResponse } from "src/utilities/responseHandle";
 
-@Controller("auth")
+@Controller("api/v1/auth")
 export class AuthController {
   constructor(private authService: AuthService) { }
 

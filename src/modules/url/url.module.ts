@@ -6,10 +6,11 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { Url, UrlSchema } from "../../entities/url.entity";
 import { AppConfig } from "src/common/config/configuration";
 import { JwtService } from "@nestjs/jwt";
+import { JwtStrategy } from "../auth/strategies/jwt.strategy";
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Url.name, schema: UrlSchema }])],
-  providers: [UrlService, AppConfig, JwtService],
+  imports: [MongooseModule.forFeature([{ name: Url.name, schema: UrlSchema }]),],
+  providers: [UrlService, AppConfig,],
   controllers: [UrlController],
 })
-export class UrlModule {}
+export class UrlModule { }
