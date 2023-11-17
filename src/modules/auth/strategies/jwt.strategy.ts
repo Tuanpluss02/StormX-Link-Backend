@@ -3,6 +3,7 @@ import { Strategy, ExtractJwt } from "passport-jwt";
 import { User } from "src/entities/user.entity";
 import { AuthService } from "../auth.service";
 import { PassportStrategy } from "@nestjs/passport";
+import { request } from "express";
 
 @Injectable({})
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt')  {
@@ -14,13 +15,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt')  {
       
     });
   }
- 
-
   async validate(payload: any): Promise<User> {
-    const user =  await this.authService.validateUser(payload);
-    if(!user) {
-     throw new HttpException('Unauthorized access', HttpStatus.UNAUTHORIZED);
+    const user = await this.authService.validateUser(payload);
+    if (!user) {
+      throw new UnauthorizedException("User not found");
     }
+    request.user = user;
     return user;
   }
 }

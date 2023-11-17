@@ -55,4 +55,11 @@ export class UserService {
     }
     return user;
   }
+  async getAllUrls(userId: string) {
+    const user = await this.userModel.findById(userId).populate("urls");
+    if (!user) {
+      throw new HttpException("User not found", 404);
+    }
+    return user.urls;
+  }
 }
