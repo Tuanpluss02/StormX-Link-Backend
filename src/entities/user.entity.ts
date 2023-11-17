@@ -4,7 +4,7 @@ import { Document } from 'mongoose';
 import { Url } from './url.entity';
 
 
-@Schema()
+@Schema({ timestamps: true})
 export class User extends Document {
   @Prop({ required: true, unique: true, index: true})
   username: string;

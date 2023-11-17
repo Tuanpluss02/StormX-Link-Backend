@@ -12,7 +12,7 @@ import {
   Res,
   UseGuards,
 } from "@nestjs/common";
-import { Response,Request, response } from "express";
+import { Response,Request } from "express";
 import { NewUrlDTO } from "./dto/new-url.dto";
 import { UrlService } from "./url.service";
 import { UpdateUrlDTO } from "./dto/update-url.dto";
@@ -20,7 +20,6 @@ import { JwtGuard } from "src/modules/auth/guards/jwt.guard";
 import { AppConfig } from "../../common/config/configuration";
 import { UserService } from "../user/user.service";
 import { iResponse } from "src/utilities/responseHandle";
-import { request } from "http";
 
 @Controller()
 export class UrlController {

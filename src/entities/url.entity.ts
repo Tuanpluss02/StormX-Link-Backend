@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose from "mongoose";
 
-@Schema()
+@Schema({ timestamps: true})
 export class Url extends mongoose.Document {
   @Prop({ required: true})
   longUrl: string;

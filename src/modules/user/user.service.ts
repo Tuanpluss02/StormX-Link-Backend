@@ -2,6 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
@@ -47,18 +48,19 @@ export class UserService {
     }
     return user;
   }
+  // async changePassword(
 
   async getUserById(id: string): Promise<User> {
     const user = await this.userModel.findById(id);
     if (!user) {
-      throw new HttpException("User not found", 404);
+      throw new NotFoundException("User not found");
     }
     return user;
   }
   async getAllUrls(userId: string): Promise<any> {
     const user = await this.userModel.findById(userId).populate("urls");
     if (!user) {
-      throw new HttpException("User not found", 404);
+      throw new NotFoundException("User not found");
     }
     return user.urls;
   }
