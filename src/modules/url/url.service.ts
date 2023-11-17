@@ -43,7 +43,7 @@ export class UrlService {
     try {
       const url = await this.urlModel.findOne({ urlCode });
       if (!url) {
-        throw new NotFoundException("No users found.");
+        throw new NotFoundException("URL not found.");
       }
       return { url: url.longUrl };
     } catch (error) {

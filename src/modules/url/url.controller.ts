@@ -15,7 +15,7 @@ import { Response } from "express";
 import { NewUrlDTO } from "./dto/new-url.dto";
 import { UrlService } from "./url.service";
 import { UpdateUrlDTO } from "./dto/update-url.dto";
-import { JwtAuthGuard } from "src/modules/auth/guards/jwt.guard";
+import { JwtGuard } from "src/modules/auth/guards/jwt.guard";
 import { AppConfig } from "../../common/config/configuration";
 
 @Controller()
@@ -26,12 +26,12 @@ export class UrlController {
   ) { }
 
   @Post("api/v1/url/create")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtGuard)
   async createUrl(@Body() newUrlDTO: NewUrlDTO, response: Response) {
     const ressult = await this.urlService.createUrl(newUrlDTO);
   }
 
-  @Get(":urlCode(*)")
+  @Get(":urlCode")
   async gotoUrl(@Param("urlCode") urlCode: string, @Res() res: Response) {
     if (!urlCode) {
       return res.redirect(this.appconfig.getFrontendUrl());
