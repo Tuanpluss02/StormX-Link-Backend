@@ -2,7 +2,6 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
-  Res,
   UnauthorizedException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
@@ -62,4 +61,7 @@ export class AuthService {
     }
     return user;
   }
+  // async verify(body: any): Promise<boolean> {
+
+  // }
 }

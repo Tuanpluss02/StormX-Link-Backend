@@ -32,7 +32,7 @@ export class UrlService {
       const newUrl = new this.urlModel({ ...newUrlDTO, urlCode: urlCode });
       return await newUrl.save();
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message,error.status || HttpStatus.INTERNAL_SERVER_ERROR,);
     }
   }
 
@@ -44,7 +44,7 @@ export class UrlService {
       }
       return { url: url.longUrl };
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, error.status || HttpStatus.INTERNAL_SERVER_ERROR,);
     }
   }
   async getAllUrls(): Promise<Url[]> {
@@ -52,7 +52,7 @@ export class UrlService {
       const urls = await this.urlModel.find();
       return urls;
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, error.status || HttpStatus.INTERNAL_SERVER_ERROR,);
     }
   }
 
@@ -60,7 +60,7 @@ export class UrlService {
     try {
       await this.urlModel.findByIdAndDelete(id);
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, error.status || HttpStatus.INTERNAL_SERVER_ERROR,);
     }
   }
 
@@ -74,7 +74,7 @@ export class UrlService {
       existingUrl.longUrl = updateUrlDTO.newLongUrl || existingUrl.longUrl;
       return await existingUrl.save();;
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message,error.status || HttpStatus.INTERNAL_SERVER_ERROR,);
     }
   }
 }
