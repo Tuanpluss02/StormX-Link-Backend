@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { Url, UrlSchema } from './url.entity';
 
 
 @Schema({ timestamps: true})
