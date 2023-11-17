@@ -61,11 +61,19 @@ export class UrlController {
     return iResponse(response, HttpStatus.OK, "Get all urls success", allUserUrl);
   }
 
-  // @Patch('api/v1/url/update/:id')
-  // @UseGuards(JwtAuthGuard)
-  // async updateUrl(@Param('id') id: string, @Body() updateUrlDTO :UpdateUrlDTO) {
-  //     return await this.urlService.updateUrl(id, updateUrlDTO);
-  // }
+  @Patch('api/v1/url/update/:id')
+  @UseGuards(JwtGuard)
+  async updateUrl(@Param('id') id: string, @Body() updateUrlDTO :UpdateUrlDTO, @Req()request: Request, @Res() response: Response) {
+    const userId = request.user['id'];
+    const allUserUrl = await this.userService.getAllUrls(userId);
+    const isUrlExist = allUserUrl.find(url => url._id.toString() === id);
+    if (!isUrlExist) {
+      return iResponse(response, HttpStatus.NOT_FOUND, "Url not found");
+    }
+    const result = await this.urlService.updateUrl(id, updateUrlDTO);
+    return iResponse(response, HttpStatus.OK, "Update url success", result);
+  }
+  
   // @Delete('api/v1/url/delete/:id')
   // @UseGuards(JwtAuthGuard)
   // async deleteUrl(@Param('id') id: string) {
