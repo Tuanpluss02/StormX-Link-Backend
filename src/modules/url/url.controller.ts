@@ -12,7 +12,7 @@ import {
   Res,
   UseGuards,
 } from "@nestjs/common";
-import { Response,Request } from "express";
+import { Response,Request, response } from "express";
 import { NewUrlDTO } from "./dto/new-url.dto";
 import { UrlService } from "./url.service";
 import { UpdateUrlDTO } from "./dto/update-url.dto";
@@ -20,6 +20,7 @@ import { JwtGuard } from "src/modules/auth/guards/jwt.guard";
 import { AppConfig } from "../../common/config/configuration";
 import { UserService } from "../user/user.service";
 import { iResponse } from "src/utilities/responseHandle";
+import { request } from "http";
 
 @Controller()
 export class UrlController {
@@ -74,9 +75,19 @@ export class UrlController {
     return iResponse(response, HttpStatus.OK, "Update url success", result);
   }
   
-  // @Delete('api/v1/url/delete/:id')
-  // @UseGuards(JwtAuthGuard)
-  // async deleteUrl(@Param('id') id: string) {
-  //     return await this.urlService.deteleUrl(id);
-  // }
+  @Delete('api/v1/url/delete/:id')
+  @UseGuards(JwtGuard)
+  async deleteUrl(@Param('id') id: string, @Req() request : Request, @Res() response: Response) {
+    const userId = request.user['id'];
+    const allUserUrl = await this.userService.getAllUrls(userId);
+    const isUrlExist = allUserUrl.find(url => url._id.toString() === id);
+    if (!isUrlExist) {
+      return iResponse(response, HttpStatus.NOT_FOUND, "Url not found");
+    }
+    await this.urlService.deteleUrl(id);
+    const user = await this.userService.getUserById(userId);
+    user.urls = user.urls.filter(url => url.toString() !== id);
+    await user.save();
+    return iResponse(response, HttpStatus.OK, "Delete url success");
+  }
 }

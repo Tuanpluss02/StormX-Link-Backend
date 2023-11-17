@@ -55,7 +55,7 @@ export class UserService {
     }
     return user;
   }
-  async getAllUrls(userId: string) {
+  async getAllUrls(userId: string): Promise<any> {
     const user = await this.userModel.findById(userId).populate("urls");
     if (!user) {
       throw new HttpException("User not found", 404);

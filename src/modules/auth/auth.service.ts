@@ -9,6 +9,7 @@ import { JwtService } from "@nestjs/jwt";
 import { RegisterDTO } from "./dto/register.dto";
 import { LoginDTO } from "./dto/login.dto";
 import { UserService } from "../user/user.service";
+import { User } from "src/entities/user.entity";
 
 @Injectable({})
 export class AuthService {
@@ -36,7 +37,7 @@ export class AuthService {
     }
   }
 
-  async login(loginDTO: LoginDTO) {
+  async login(loginDTO: LoginDTO): Promise<{ accessToken: string }> {
     try {
       const { username, password } = loginDTO;
       const user = await this.userService.userLogin(username, password);
@@ -54,7 +55,7 @@ export class AuthService {
       );
     }
   }
-  async validateUser(payload: any) {
+  async validateUser(payload: any): Promise<User> {
     const user = await this.userService.getUserById(payload.sub);
     if (!user) {
       throw new UnauthorizedException("User not found");
