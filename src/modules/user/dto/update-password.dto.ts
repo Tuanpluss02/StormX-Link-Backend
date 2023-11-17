@@ -3,10 +3,6 @@ import { IsNotEmpty, IsStrongPassword, MaxLength, MinLength } from "class-valida
 
 export class UpdateUserPasswordDTO {
     @IsNotEmpty()
-    @IsNotEmpty()
-    @IsStrongPassword()
-    @MinLength(4)
-    @MaxLength(20)
     @ApiProperty(
       {
         type: String,

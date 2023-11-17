@@ -20,7 +20,7 @@ import { JwtGuard } from "src/modules/auth/guards/jwt.guard";
 import { AppConfig } from "../../common/config/configuration";
 import { UserService } from "../user/user.service";
 import { iResponse } from "src/utilities/responseHandle";
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiBody, ApiTags } from "@nestjs/swagger";
 
 @Controller()
 @ApiTags("URL")
@@ -33,6 +33,7 @@ export class UrlController {
 
   @Post("api/v1/url/create")
   @ApiBearerAuth()
+  @ApiBody({ type: NewUrlDTO })
   @UseGuards(JwtGuard)
   async createUrl(@Body() newUrlDTO: NewUrlDTO,@Req()request: Request, @Res() response: Response) {
     const newUrl = await this.urlService.createUrl(newUrlDTO);
@@ -53,7 +54,7 @@ export class UrlController {
     if (result.url) {
       return res.redirect(result.url);
     }
-    return new HttpException("URL not found", HttpStatus.NOT_FOUND);
+    throw new HttpException("URL not found", HttpStatus.NOT_FOUND);
   }
 
   @Get('api/v1/url/getAll')
@@ -68,6 +69,7 @@ export class UrlController {
   @Patch('api/v1/url/update/:id')
   @UseGuards(JwtGuard)
   @ApiBearerAuth()
+  @ApiBody({ type: UpdateUrlDTO })
   async updateUrl(@Param('id') id: string, @Body() updateUrlDTO :UpdateUrlDTO, @Req()request: Request, @Res() response: Response) {
     const userId = request.user['id'];
     const allUserUrl = await this.userService.getAllUrls(userId);
@@ -84,13 +86,12 @@ export class UrlController {
   @ApiBearerAuth()
   async deleteUrl(@Param('id') id: string, @Req() request : Request, @Res() response: Response) {
     const userId = request.user['id'];
-    const allUserUrl = await this.userService.getAllUrls(userId);
-    const isUrlExist = allUserUrl.find(url => url._id.toString() === id);
+    const user = await this.userService.getUserById(userId);
+    const isUrlExist = user.urls.find(url => url.toString() === id);
     if (!isUrlExist) {
-      return iResponse(response, HttpStatus.NOT_FOUND, "URL not found");
+      throw new HttpException("URL not found", HttpStatus.NOT_FOUND);
     }
     await this.urlService.deteleUrl(id);
-    const user = await this.userService.getUserById(userId);
     user.urls = user.urls.filter(url => url.toString() !== id);
     await user.save();
     return iResponse(response, HttpStatus.OK, "URL deletion successful.");
