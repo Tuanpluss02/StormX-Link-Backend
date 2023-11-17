@@ -7,7 +7,7 @@ import {
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { response } from "express";
-import { STATUS_CODES } from "http";
+import { STATUS_CODES, get } from "http";
 import { Model } from "mongoose";
 import { Url } from "src/entities/url.entity";
 import { User } from "src/entities/user.entity";
@@ -48,7 +48,21 @@ export class UserService {
     }
     return user;
   }
-  // async changePassword(
+  async changePassword(id:string,oldPassword:string,newPassword:string): Promise<any>
+  {
+    const user = await this.getUserById(id);
+    const checkPassword = await PasswordUtil.comparePassword(
+      oldPassword,
+      user.password,
+    );
+    if (!checkPassword) {
+      throw new UnauthorizedException("Invalid old password");
+    }
+    const hashedPassword = await PasswordUtil.hashPassword(newPassword);
+    user.password = hashedPassword;
+    await user.save();
+    return {message: "Change password successfully"};
+  }
 
   async getUserById(id: string): Promise<User> {
     const user = await this.userModel.findById(id);

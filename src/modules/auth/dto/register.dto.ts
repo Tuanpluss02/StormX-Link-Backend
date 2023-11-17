@@ -1,3 +1,4 @@
+import { ApiProperty } from "@nestjs/swagger";
 import {
   IsAlphanumeric,
   IsNotEmpty,
@@ -11,11 +12,25 @@ export class RegisterDTO {
   @IsAlphanumeric()
   @MinLength(4)
   @MaxLength(20)
+  @ApiProperty(
+    {
+      type: String,
+      description: "Username",
+      default: "admin",
+    },
+  )
   readonly username: string;
 
   @IsNotEmpty()
   @IsStrongPassword()
   @MinLength(4)
   @MaxLength(20)
+  @ApiProperty(
+    {
+      type: String,
+      description: "Password",
+      default: "admin",
+    },
+  )
   readonly password: string;
 }
