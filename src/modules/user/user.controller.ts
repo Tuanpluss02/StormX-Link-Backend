@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpStatus, Post, Req, Res, UseGuards } from '@n
 import { Response, Request } from "express";
 import { UserService } from './user.service';
 import { iResponse } from 'src/utilities/responseHandle';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { UpdateUserPasswordDTO } from './dto/update-password.dto';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
@@ -27,10 +27,11 @@ export class UserController {
     @Post('/changePassword')
     @ApiBearerAuth()
     @UseGuards(JwtGuard)
+    @ApiConsumes('application/x-www-form-urlencoded')
     async changePassword(@Body() updateUserPasswordDTO: UpdateUserPasswordDTO,@Req() request: Request, @Res() response: Response) {
         const userid = request.user['id'];
         await this.userService.changePassword(userid,updateUserPasswordDTO.oldPassword,updateUserPasswordDTO.newPassword);
         return iResponse(response, HttpStatus.OK, "Password change successful.");
     }
-    
+
 }
