@@ -12,6 +12,7 @@ import { NewUrlDTO } from "./dto/new-url.dto";
 import * as crypto from "crypto";
 import { UpdateUrlDTO } from "./dto/update-url.dto";
 import e from "express";
+import { genUrlCode } from "src/utilities/urlCodeGenerator";
 
 @Injectable()
 export class UrlService {
@@ -19,7 +20,7 @@ export class UrlService {
 
   async createUrl(newUrlDTO: NewUrlDTO): Promise<Url> {
     try {
-      let urlCode = newUrlDTO.urlCode || crypto.randomBytes(8).toString("hex");
+      let urlCode = newUrlDTO.urlCode || genUrlCode();
       const isAvailable = await this.urlModel.findOne({
           urlCode: newUrlDTO.urlCode,
         });
