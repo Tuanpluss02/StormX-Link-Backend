@@ -12,15 +12,15 @@ import {
   Res,
   UseGuards,
 } from "@nestjs/common";
-import { Response,Request } from "express";
-import { NewUrlDTO } from "./dto/new-url.dto";
-import { UrlService } from "./url.service";
-import { UpdateUrlDTO } from "./dto/update-url.dto";
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from "@nestjs/swagger";
+import { Request, Response } from "express";
 import { JwtGuard } from "src/modules/auth/guards/jwt.guard";
+import { iResponse } from "src/utilities/responseHandle";
 import { AppConfig } from "../../common/config/configuration";
 import { UserService } from "../user/user.service";
-import { iResponse } from "src/utilities/responseHandle";
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from "@nestjs/swagger";
+import { NewUrlDTO } from "./dto/new-url.dto";
+import { UpdateUrlDTO } from "./dto/update-url.dto";
+import { UrlService } from "./url.service";
 
 @Controller()
 @ApiTags("URL")
@@ -36,7 +36,7 @@ export class UrlController {
   @ApiBody({ type: NewUrlDTO })
   @UseGuards(JwtGuard)
   @ApiConsumes('application/x-www-form-urlencoded')
-  async createUrl(@Body() newUrlDTO: NewUrlDTO,@Req()request: Request, @Res() response: Response) {
+  async createUrl(@Body() newUrlDTO: NewUrlDTO, @Req() request: Request, @Res() response: Response) {
     const newUrl = await this.urlService.createUrl(newUrlDTO);
     const userId = request.user['id'];
     const user = await this.userService.getUserById(userId);
@@ -62,9 +62,10 @@ export class UrlController {
   @UseGuards(JwtGuard)
   @ApiBearerAuth()
   @ApiConsumes('application/x-www-form-urlencoded')
-  async getAllUrls(@Req()request: Request, @Res() response: Response) {
+  async getAllUrls(@Req() request: Request, @Res() response: Response) {
     const userId = request.user['id'];
     const allUserUrl = await this.userService.getAllUrls(userId);
+    allUserUrl.reverse();
     return iResponse(response, HttpStatus.OK, "Retrieving all URLs successful.", allUserUrl);
   }
 
@@ -73,7 +74,7 @@ export class UrlController {
   @ApiBearerAuth()
   @ApiBody({ type: UpdateUrlDTO })
   @ApiConsumes('application/x-www-form-urlencoded')
-  async updateUrl(@Param('id') id: string, @Body() updateUrlDTO :UpdateUrlDTO, @Req()request: Request, @Res() response: Response) {
+  async updateUrl(@Param('id') id: string, @Body() updateUrlDTO: UpdateUrlDTO, @Req() request: Request, @Res() response: Response) {
     const userId = request.user['id'];
     const allUserUrl = await this.userService.getAllUrls(userId);
     const isUrlExist = allUserUrl.find(url => url._id.toString() === id);
@@ -83,12 +84,12 @@ export class UrlController {
     const result = await this.urlService.updateUrl(id, updateUrlDTO);
     return iResponse(response, HttpStatus.OK, "URL update successful.", result);
   }
-  
+
   @Delete('api/v1/url/delete/:id')
   @UseGuards(JwtGuard)
   @ApiBearerAuth()
   @ApiConsumes('application/x-www-form-urlencoded')
-  async deleteUrl(@Param('id') id: string, @Req() request : Request, @Res() response: Response) {
+  async deleteUrl(@Param('id') id: string, @Req() request: Request, @Res() response: Response) {
     const userId = request.user['id'];
     const user = await this.userService.getUserById(userId);
     const isUrlExist = user.urls.find(url => url.toString() === id);
