@@ -3,7 +3,7 @@ import {
   IsAlphanumeric,
   IsNotEmpty,
   MaxLength,
-  MinLength
+  MinLength,
 } from "class-validator";
 
 export class RegisterDTO {
@@ -11,24 +11,20 @@ export class RegisterDTO {
   @IsAlphanumeric()
   @MinLength(4)
   @MaxLength(20)
-  @ApiProperty(
-    {
-      type: String,
-      description: "Username",
-      default: "admin",
-    },
-  )
+  @ApiProperty({
+    type: String,
+    description: "Username",
+    default: "admin",
+  })
   readonly username: string;
 
   @IsNotEmpty()
   @MinLength(4)
   @MaxLength(20)
-  @ApiProperty(
-    {
-      type: String,
-      description: "Password",
-      default: "admin",
-    },
-  )
+  @ApiProperty({
+    type: String,
+    description: "Password",
+    default: "admin",
+  })
   readonly password: string;
 }

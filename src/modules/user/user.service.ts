@@ -12,9 +12,7 @@ import { PasswordUtil } from "src/utils/passwordUltil";
 
 @Injectable()
 export class UserService {
-  constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
-  ) { }
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async createUser(username: string, password: string): Promise<User> {
     const userExist = await this.userModel.findOne({ username: username });
@@ -45,7 +43,11 @@ export class UserService {
     return user;
   }
 
-  async changePassword(id: string, oldPassword: string, newPassword: string): Promise<any> {
+  async changePassword(
+    id: string,
+    oldPassword: string,
+    newPassword: string,
+  ): Promise<any> {
     const user = await this.getUserById(id);
     const checkPassword = await PasswordUtil.comparePassword(
       oldPassword,

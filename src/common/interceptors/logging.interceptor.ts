@@ -24,10 +24,10 @@ export class LoggingInterceptor implements NestInterceptor {
         const response = context.switchToHttp().getResponse();
         const { statusCode } = response;
         this.logger.log(
-          `${method} ${url} ${statusCode} - ${userAgent} ${ip}: ${Date.now() - now
+          `${method} ${url} ${statusCode} - ${userAgent} ${ip}: ${
+            Date.now() - now
           }ms`,
         );
-
       }),
     );
   }

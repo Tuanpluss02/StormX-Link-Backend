@@ -5,17 +5,17 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { RegisterDTO } from "./dto/register.dto";
-import { LoginDTO } from "./dto/login.dto";
-import { UserService } from "../user/user.service";
 import { User } from "src/entities/user.entity";
+import { UserService } from "../user/user.service";
+import { LoginDTO } from "./dto/login.dto";
+import { RegisterDTO } from "./dto/register.dto";
 
 @Injectable({})
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
-  ) { }
+  ) {}
 
   async register(registerDTO: RegisterDTO): Promise<{ accessToken: string }> {
     try {
@@ -26,7 +26,6 @@ export class AuthService {
         expiresIn: process.env.ACCESS_TOKEN_EXPIRES,
         secret: process.env.SECRET_KEY,
       });
-      // const token = await this.jwtService.signAsync(payload);
       return { accessToken: token };
     } catch (error) {
       throw new HttpException(
@@ -45,7 +44,6 @@ export class AuthService {
         expiresIn: process.env.ACCESS_TOKEN_EXPIRES,
         secret: process.env.SECRET_KEY,
       });
-      // const token = await this.jwtService.signAsync(payload);
       return { accessToken: token };
     } catch (error) {
       throw new HttpException(
@@ -61,7 +59,4 @@ export class AuthService {
     }
     return user;
   }
-  // async verify(body: any): Promise<boolean> {
-
-  // }
 }

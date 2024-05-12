@@ -28,8 +28,8 @@ import { LoggingInterceptor } from "./common/interceptors/logging.interceptor";
     },
     {
       provide: APP_FILTER,
-      useClass: HttpExceptionFilter
+      useClass: HttpExceptionFilter,
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

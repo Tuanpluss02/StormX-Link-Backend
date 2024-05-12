@@ -2,7 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
-  NotFoundException
+  NotFoundException,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import * as crypto from "crypto";
@@ -14,7 +14,7 @@ import { UpdateUrlDTO } from "./dto/update-url.dto";
 
 @Injectable()
 export class UrlService {
-  constructor(@InjectModel(Url.name) private readonly urlModel: Model<Url>) { }
+  constructor(@InjectModel(Url.name) private readonly urlModel: Model<Url>) {}
 
   async createUrl(newUrlDTO: NewUrlDTO): Promise<Url> {
     try {
@@ -31,7 +31,10 @@ export class UrlService {
       const newUrl = new this.urlModel({ ...newUrlDTO, urlCode: urlCode });
       return await newUrl.save();
     } catch (error) {
-      throw new HttpException(error.message, error.status || HttpStatus.INTERNAL_SERVER_ERROR,);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -43,7 +46,10 @@ export class UrlService {
       }
       return { url: url.longUrl };
     } catch (error) {
-      throw new HttpException(error.message, error.status || HttpStatus.INTERNAL_SERVER_ERROR,);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
   async getAllUrls(): Promise<Url[]> {
@@ -51,7 +57,10 @@ export class UrlService {
       const urls = await this.urlModel.find();
       return urls;
     } catch (error) {
-      throw new HttpException(error.message, error.status || HttpStatus.INTERNAL_SERVER_ERROR,);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -59,7 +68,10 @@ export class UrlService {
     try {
       await this.urlModel.findByIdAndDelete(id);
     } catch (error) {
-      throw new HttpException(error.message, error.status || HttpStatus.INTERNAL_SERVER_ERROR,);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -69,11 +81,15 @@ export class UrlService {
       if (!existingUrl) {
         throw new NotFoundException("URL not found.");
       }
-      existingUrl.urlCode = updateUrlDTO.newUrlCode || crypto.randomBytes(8).toString("hex");
+      existingUrl.urlCode =
+        updateUrlDTO.newUrlCode || crypto.randomBytes(8).toString("hex");
       existingUrl.longUrl = updateUrlDTO.newLongUrl || existingUrl.longUrl;
-      return await existingUrl.save();;
+      return await existingUrl.save();
     } catch (error) {
-      throw new HttpException(error.message, error.status || HttpStatus.INTERNAL_SERVER_ERROR,);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

@@ -9,8 +9,11 @@ import { UrlController } from "./url.controller";
 import { UrlService } from "./url.service";
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Url.name, schema: UrlSchema }]), MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),],
+  imports: [
+    MongooseModule.forFeature([{ name: Url.name, schema: UrlSchema }]),
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+  ],
   providers: [UrlService, JwtStrategy, AuthService, UserService],
   controllers: [UrlController],
 })
-export class UrlModule { }
+export class UrlModule {}

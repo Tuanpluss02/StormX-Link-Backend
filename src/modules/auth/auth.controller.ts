@@ -9,22 +9,26 @@ import { RegisterDTO } from "./dto/register.dto";
 @Controller("api/v1/auth")
 @ApiTags("Auth")
 export class AuthController {
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService) {}
 
   @Post("register")
-  @ApiConsumes('application/x-www-form-urlencoded')
+  @ApiConsumes("application/x-www-form-urlencoded")
   @ApiBody({ type: RegisterDTO })
   async register(@Body() registerDTO: RegisterDTO, @Res() response: Response) {
     const result = await this.authService.register(registerDTO);
-    return iResponse(response, HttpStatus.OK, "Registration successful", result);
+    return iResponse(
+      response,
+      HttpStatus.OK,
+      "Registration successful",
+      result,
+    );
   }
 
   @Post("login")
-  @ApiConsumes('application/x-www-form-urlencoded')
+  @ApiConsumes("application/x-www-form-urlencoded")
   @ApiBody({ type: LoginDTO, description: "Login", required: true })
   async login(@Body() loginDTO: LoginDTO, @Res() response: Response) {
     const result = await this.authService.login(loginDTO);
     return iResponse(response, HttpStatus.OK, "Login successful", result);
   }
-
 }
