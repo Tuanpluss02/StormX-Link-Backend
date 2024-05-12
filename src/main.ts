@@ -8,8 +8,8 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors();
   const config = new DocumentBuilder()
-    .setTitle("URL Shortener API")
-    .setDescription("The URL Shortener API description")
+    .setTitle("StormX Link API")
+    .setDescription("The StormX Link API description")
     .setVersion("1.0")
     .addBearerAuth()
     .addBasicAuth()
