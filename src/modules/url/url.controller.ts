@@ -15,8 +15,7 @@ import {
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
 import { JwtGuard } from "src/modules/auth/guards/jwt.guard";
-import { iResponse } from "src/utilities/responseHandle";
-import { AppConfig } from "../../common/config/configuration";
+import { iResponse } from "src/utils/responseHandle";
 import { UserService } from "../user/user.service";
 import { NewUrlDTO } from "./dto/new-url.dto";
 import { UpdateUrlDTO } from "./dto/update-url.dto";
@@ -27,7 +26,6 @@ import { UrlService } from "./url.service";
 export class UrlController {
   constructor(
     private readonly urlService: UrlService,
-    private readonly appconfig: AppConfig,
     private readonly userService: UserService,
   ) { }
 
@@ -49,7 +47,7 @@ export class UrlController {
   @Get(":urlCode")
   async gotoUrl(@Param("urlCode") urlCode: string, @Res() res: Response) {
     if (!urlCode) {
-      return res.redirect(this.appconfig.getFrontendUrl());
+      return res.redirect(process.env.FRONTEND_URL);
     }
     const result = await this.urlService.getLongUrl(urlCode);
     if (result.url) {

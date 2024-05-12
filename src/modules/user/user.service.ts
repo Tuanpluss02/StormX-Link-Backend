@@ -6,19 +6,15 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { response } from "express";
-import { STATUS_CODES, get } from "http";
 import { Model } from "mongoose";
-import { Url } from "src/entities/url.entity";
 import { User } from "src/entities/user.entity";
-import { PasswordUtil } from "src/utilities/passwordUltil";
+import { PasswordUtil } from "src/utils/passwordUltil";
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
-    @InjectModel(Url.name) private urlModel: Model<Url>,
-  ) {}
+  ) { }
 
   async createUser(username: string, password: string): Promise<User> {
     const userExist = await this.userModel.findOne({ username: username });
@@ -48,8 +44,8 @@ export class UserService {
     }
     return user;
   }
-  async changePassword(id:string,oldPassword:string,newPassword:string): Promise<any>
-  {
+
+  async changePassword(id: string, oldPassword: string, newPassword: string): Promise<any> {
     const user = await this.getUserById(id);
     const checkPassword = await PasswordUtil.comparePassword(
       oldPassword,
@@ -61,7 +57,7 @@ export class UserService {
     const hashedPassword = await PasswordUtil.hashPassword(newPassword);
     user.password = hashedPassword;
     await user.save();
-    return {message: "Change password successfully"};
+    return { message: "Change password successfully" };
   }
 
   async getUserById(id: string): Promise<User> {

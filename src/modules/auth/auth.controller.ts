@@ -1,10 +1,10 @@
 import { Body, Controller, HttpStatus, Post, Res } from "@nestjs/common";
-import { AuthService } from "./auth.service";
-import { RegisterDTO } from "./dto/register.dto";
-import { LoginDTO } from "./dto/login.dto";
+import { ApiBody, ApiConsumes, ApiTags } from "@nestjs/swagger";
 import { Response } from "express";
-import { iResponse } from "src/utilities/responseHandle";
-import { ApiBasicAuth, ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from "@nestjs/swagger";
+import { iResponse } from "src/utils/responseHandle";
+import { AuthService } from "./auth.service";
+import { LoginDTO } from "./dto/login.dto";
+import { RegisterDTO } from "./dto/register.dto";
 
 @Controller("api/v1/auth")
 @ApiTags("Auth")
@@ -21,15 +21,10 @@ export class AuthController {
 
   @Post("login")
   @ApiConsumes('application/x-www-form-urlencoded')
-  @ApiBody({ type: LoginDTO , description: "Login", required: true})
+  @ApiBody({ type: LoginDTO, description: "Login", required: true })
   async login(@Body() loginDTO: LoginDTO, @Res() response: Response) {
     const result = await this.authService.login(loginDTO);
     return iResponse(response, HttpStatus.OK, "Login successful", result);
   }
 
-  // @Post("refresh-token")
-  // async refreshToken(@Res() response: Response) {
-  //   const result = await this.authService.refreshToken();
-  //   return iResponse(response, HttpStatus.OK, "Refresh token success", result);
-  // }
 }

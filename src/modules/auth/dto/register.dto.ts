@@ -2,9 +2,8 @@ import { ApiProperty } from "@nestjs/swagger";
 import {
   IsAlphanumeric,
   IsNotEmpty,
-  IsStrongPassword,
   MaxLength,
-  MinLength,
+  MinLength
 } from "class-validator";
 
 export class RegisterDTO {
@@ -22,7 +21,6 @@ export class RegisterDTO {
   readonly username: string;
 
   @IsNotEmpty()
-  @IsStrongPassword()
   @MinLength(4)
   @MaxLength(20)
   @ApiProperty(
