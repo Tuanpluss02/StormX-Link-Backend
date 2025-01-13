@@ -13,7 +13,7 @@ export class LoggingInterceptor implements NestInterceptor {
 
   intercept(
     context: ExecutionContext,
-    next: CallHandler<any>,
+    next: CallHandler,
   ): Observable<any> | Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
     const userAgent = request.get("user-agent") || "";
@@ -21,7 +21,7 @@ export class LoggingInterceptor implements NestInterceptor {
     const now = Date.now();
 
     return next.handle().pipe(
-      tap((res) => {
+      tap(() => {
         const response = context.switchToHttp().getResponse();
         const { statusCode } = response;
         this.logger.log(
