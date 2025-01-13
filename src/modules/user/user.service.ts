@@ -8,7 +8,7 @@ import {
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { User } from "src/entities/user.entity";
-import { PasswordUtil } from "src/utils/passwordUltil";
+import { PasswordUtil } from "src/utils/password-util";
 
 @Injectable()
 export class UserService {
@@ -56,8 +56,7 @@ export class UserService {
     if (!checkPassword) {
       throw new UnauthorizedException("Invalid old password");
     }
-    const hashedPassword = await PasswordUtil.hashPassword(newPassword);
-    user.password = hashedPassword;
+    user.password = await PasswordUtil.hashPassword(newPassword);
     await user.save();
     return { message: "Change password successfully" };
   }

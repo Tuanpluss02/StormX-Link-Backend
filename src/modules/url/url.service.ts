@@ -7,7 +7,7 @@ import {
 import { InjectModel } from "@nestjs/mongoose";
 import * as crypto from "crypto";
 import { Model } from "mongoose";
-import { genUrlCode } from "src/utils/urlCodeGenerator";
+import { genUrlCode } from "src/utils/url-code-generator";
 import { Url } from "../../entities/url.entity";
 import { NewUrlDTO } from "./dto/new-url.dto";
 import { UpdateUrlDTO } from "./dto/update-url.dto";
@@ -55,8 +55,7 @@ export class UrlService {
 
   async getAllUrls(): Promise<Url[]> {
     try {
-      const urls = await this.urlModel.find();
-      return urls;
+      return await this.urlModel.find();
     } catch (error) {
       throw new HttpException(
         error.message,
@@ -65,7 +64,7 @@ export class UrlService {
     }
   }
 
-  async deteleUrl(id: string): Promise<void> {
+  async deleteUrl(id: string): Promise<void> {
     try {
       await this.urlModel.findByIdAndDelete(id);
     } catch (error) {

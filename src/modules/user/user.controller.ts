@@ -10,7 +10,7 @@ import {
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiConsumes, ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
-import { iResponse } from "src/utils/responseHandle";
+import { iResponse } from "src/utils/response-handle";
 import { JwtGuard } from "../auth/guards/jwt.guard";
 import { UpdateUserPasswordDTO } from "./dto/update-password.dto";
 import { UserService } from "./user.service";

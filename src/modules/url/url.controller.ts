@@ -15,7 +15,7 @@ import {
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
 import { JwtGuard } from "src/modules/auth/guards/jwt.guard";
-import { iResponse } from "src/utils/responseHandle";
+import { iResponse } from "src/utils/response-handle";
 import { UserService } from "../user/user.service";
 import { NewUrlDTO } from "./dto/new-url.dto";
 import { UpdateUrlDTO } from "./dto/update-url.dto";
@@ -116,7 +116,7 @@ export class UrlController {
     if (!isUrlExist) {
       throw new HttpException("URL not found", HttpStatus.NOT_FOUND);
     }
-    await this.urlService.deteleUrl(id);
+    await this.urlService.deleteUrl(id);
     user.urls = user.urls.filter((url) => url.toString() !== id);
     await user.save();
     return iResponse(response, HttpStatus.OK, "URL deletion successful.");
