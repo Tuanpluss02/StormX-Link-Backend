@@ -1,10 +1,5 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  UnauthorizedException,
-} from "@nestjs/common";
-import { Strategy, ExtractJwt } from "passport-jwt";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { ExtractJwt, Strategy } from "passport-jwt";
 import { User } from "src/entities/user.entity";
 import { AuthService } from "../auth.service";
 import { PassportStrategy } from "@nestjs/passport";
@@ -19,6 +14,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
       secretOrKey: process.env.SECRET_KEY,
     });
   }
+
   async validate(payload: any): Promise<User> {
     const user = await this.authService.validateUser(payload);
     if (!user) {

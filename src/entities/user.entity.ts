@@ -1,6 +1,5 @@
-import mongoose from "mongoose";
+import mongoose, { Document } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Document } from "mongoose";
 
 @Schema({ timestamps: true })
 export class User extends Document {
@@ -16,4 +15,5 @@ export class User extends Document {
   })
   urls: mongoose.Types.ObjectId[];
 }
+
 export const UserSchema = SchemaFactory.createForClass(User);

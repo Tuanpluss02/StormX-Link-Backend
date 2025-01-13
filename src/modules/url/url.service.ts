@@ -18,7 +18,7 @@ export class UrlService {
 
   async createUrl(newUrlDTO: NewUrlDTO): Promise<Url> {
     try {
-      let urlCode = newUrlDTO.urlCode || genUrlCode();
+      const urlCode = newUrlDTO.urlCode || genUrlCode();
       const isAvailable = await this.urlModel.findOne({
         urlCode: newUrlDTO.urlCode,
       });
@@ -52,6 +52,7 @@ export class UrlService {
       );
     }
   }
+
   async getAllUrls(): Promise<Url[]> {
     try {
       const urls = await this.urlModel.find();

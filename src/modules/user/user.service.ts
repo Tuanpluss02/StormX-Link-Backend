@@ -69,6 +69,7 @@ export class UserService {
     }
     return user;
   }
+
   async getAllUrls(userId: string): Promise<any> {
     const user = await this.userModel.findById(userId).populate("urls");
     if (!user) {

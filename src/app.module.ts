@@ -1,4 +1,4 @@
-import { Module, Scope } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { AuthModule } from "./modules/auth/auth.module";
 import { UserModule } from "./modules/user/user.module";
 import { UrlModule } from "./modules/url/url.module";

@@ -52,6 +52,7 @@ export class AuthService {
       );
     }
   }
+
   async validateUser(payload: any): Promise<User> {
     const user = await this.userService.getUserById(payload.sub);
     if (!user) {

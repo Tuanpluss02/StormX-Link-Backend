@@ -8,6 +8,7 @@ import { UserService } from "../user/user.service";
 import { Url, UrlSchema } from "src/entities/url.entity";
 import { PassportModule } from "@nestjs/passport";
 import { JwtStrategy } from "./strategies/jwt.strategy";
+
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: "jwt" }),

@@ -10,6 +10,7 @@ import { Request, Response } from "express";
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(HttpExceptionFilter.name);
+
   catch(exception: HttpException, host: ArgumentsHost) {
     this.logger.debug(exception.name);
     const ctx = host.switchToHttp();
@@ -17,7 +18,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
     const message = exception.message;
-    const validationErrors: Array<String> =
+    const validationErrors: Array<string> =
       exception.getResponse()["message"][0];
 
     response.status(status).json({
