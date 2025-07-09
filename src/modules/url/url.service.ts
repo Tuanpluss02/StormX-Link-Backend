@@ -13,6 +13,7 @@ import {
 } from "src/common/dto/pagination.dto";
 import { CacheService } from "src/modules/cache/cache.service";
 import { UrlCodeGenerator } from "src/utils/url-code-generator";
+import { ValidationUtil } from "src/utils/validation.util";
 import { Url } from "../../entities/url.entity";
 import { NewUrlDTO } from "./dto/new-url.dto";
 import { UpdateUrlDTO } from "./dto/update-url.dto";
@@ -28,12 +29,18 @@ export class UrlService {
 
   async createUrl(newUrlDTO: NewUrlDTO, userId?: string): Promise<Url> {
     try {
+      // Validate the URL
+      ValidationUtil.validateUrl(newUrlDTO.longUrl);
+
       let urlCode: string;
 
       if (newUrlDTO.urlCode) {
+        // Sanitize and validate custom code
+        const sanitizedCode = ValidationUtil.sanitizeString(newUrlDTO.urlCode);
+
         // Check if custom code is available
         const existingUrl = await this.urlModel.findOne({
-          urlCode: newUrlDTO.urlCode,
+          urlCode: sanitizedCode,
         });
         if (existingUrl) {
           throw new HttpException(
@@ -41,7 +48,7 @@ export class UrlService {
             HttpStatus.BAD_REQUEST,
           );
         }
-        urlCode = newUrlDTO.urlCode;
+        urlCode = sanitizedCode;
       } else {
         // Generate unique code with collision handling
         urlCode = await UrlCodeGenerator.generateUniqueCode(
@@ -310,13 +317,20 @@ export class UrlService {
       const updateData: any = {};
 
       if (updateUrlDTO.newLongUrl) {
+        // Validate the new URL
+        ValidationUtil.validateUrl(updateUrlDTO.newLongUrl);
         updateData.longUrl = updateUrlDTO.newLongUrl;
       }
 
       if (updateUrlDTO.newUrlCode) {
+        // Sanitize and validate new code
+        const sanitizedCode = ValidationUtil.sanitizeString(
+          updateUrlDTO.newUrlCode,
+        );
+
         // Check if new code is available
         const codeExists = await this.urlModel.findOne({
-          urlCode: updateUrlDTO.newUrlCode,
+          urlCode: sanitizedCode,
           _id: { $ne: id },
         });
 
@@ -326,7 +340,7 @@ export class UrlService {
             HttpStatus.BAD_REQUEST,
           );
         }
-        updateData.urlCode = updateUrlDTO.newUrlCode;
+        updateData.urlCode = sanitizedCode;
       }
 
       const updatedUrl = await this.urlModel.findOneAndUpdate(
@@ -334,6 +348,11 @@ export class UrlService {
         updateData,
         { new: true },
       );
+
+      // Clear cache for the old URL code if it changed
+      if (updateData.urlCode && updateData.urlCode !== existingUrl.urlCode) {
+        await this.cacheService.deleteUrl(existingUrl.urlCode);
+      }
 
       this.logger.log(`URL updated: ${id}`);
       return updatedUrl;

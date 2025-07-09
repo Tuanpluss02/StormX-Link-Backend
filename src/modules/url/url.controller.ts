@@ -13,13 +13,23 @@ import {
   Res,
   UseGuards,
 } from "@nestjs/common";
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiResponse,
+  ApiTags,
+} from "@nestjs/swagger";
 import { Request, Response } from "express";
-import { PaginationDto } from "src/common/dto/pagination.dto";
+import {
+  PaginationDto,
+  PaginatedResponse,
+} from "src/common/dto/pagination.dto";
+import { Url } from "src/entities/url.entity";
 import { JwtGuard } from "src/modules/auth/guards/jwt.guard";
-import { iResponse } from "src/utils/response-handle";
 import { UserService } from "../user/user.service";
 import { NewUrlDTO } from "./dto/new-url.dto";
+import { PaginatedUrlResponseDto } from "./dto/paginated-url-response.dto";
 import { UpdateUrlDTO } from "./dto/update-url.dto";
 import { UrlService } from "./url.service";
 
@@ -36,22 +46,29 @@ export class UrlController {
   @ApiBody({ type: NewUrlDTO })
   @UseGuards(JwtGuard)
   @ApiConsumes("application/x-www-form-urlencoded")
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: "URL created successfully",
+    type: Url,
+  })
   async createUrl(
     @Body() newUrlDTO: NewUrlDTO,
     @Req() request: Request,
-    @Res() response: Response,
-  ) {
+  ): Promise<{
+    statusCode: number;
+    message: string;
+    data: Url;
+  }> {
     const userId = request.user["id"];
     const newUrl = await this.urlService.createUrl(newUrlDTO, userId);
     const user = await this.userService.getUserById(userId);
     user.urls.push(newUrl.id);
     await user.save();
-    return iResponse(
-      response,
-      HttpStatus.OK,
-      "URL creation successful.",
-      newUrl,
-    );
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: "URL creation successful",
+      data: newUrl,
+    };
   }
 
   @Get(":urlCode")
@@ -70,19 +87,26 @@ export class UrlController {
   @UseGuards(JwtGuard)
   @ApiBearerAuth()
   @ApiConsumes("application/x-www-form-urlencoded")
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: "URLs retrieved successfully",
+    type: PaginatedUrlResponseDto,
+  })
   async getAllUrls(
     @Req() request: Request,
-    @Res() response: Response,
     @Query() paginationDto: PaginationDto,
-  ) {
+  ): Promise<{
+    statusCode: number;
+    message: string;
+    data: PaginatedResponse<Url>;
+  }> {
     const userId = request.user["id"];
     const result = await this.urlService.getUrlsByUserId(userId, paginationDto);
-    return iResponse(
-      response,
-      HttpStatus.OK,
-      "Retrieving all URLs successful.",
-      result,
-    );
+    return {
+      statusCode: HttpStatus.OK,
+      message: "Retrieving all URLs successful",
+      data: result,
+    };
   }
 
   @Patch("api/v1/url/update/:id")
@@ -90,31 +114,52 @@ export class UrlController {
   @ApiBearerAuth()
   @ApiBody({ type: UpdateUrlDTO })
   @ApiConsumes("application/x-www-form-urlencoded")
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: "URL updated successfully",
+    type: Url,
+  })
   async updateUrl(
     @Param("id") id: string,
     @Body() updateUrlDTO: UpdateUrlDTO,
     @Req() request: Request,
-    @Res() response: Response,
-  ) {
+  ): Promise<{
+    statusCode: number;
+    message: string;
+    data: Url;
+  }> {
     const userId = request.user["id"];
     const result = await this.urlService.updateUrl(id, updateUrlDTO, userId);
-    return iResponse(response, HttpStatus.OK, "URL update successful.", result);
+    return {
+      statusCode: HttpStatus.OK,
+      message: "URL update successful",
+      data: result,
+    };
   }
 
   @Delete("api/v1/url/delete/:id")
   @UseGuards(JwtGuard)
   @ApiBearerAuth()
   @ApiConsumes("application/x-www-form-urlencoded")
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: "URL deleted successfully",
+  })
   async deleteUrl(
     @Param("id") id: string,
     @Req() request: Request,
-    @Res() response: Response,
-  ) {
+  ): Promise<{
+    statusCode: number;
+    message: string;
+  }> {
     const userId = request.user["id"];
     await this.urlService.deleteUrl(id, userId);
     const user = await this.userService.getUserById(userId);
     user.urls = user.urls.filter((url) => url.toString() !== id);
     await user.save();
-    return iResponse(response, HttpStatus.OK, "URL deletion successful.");
+    return {
+      statusCode: HttpStatus.OK,
+      message: "URL deletion successful",
+    };
   }
 }

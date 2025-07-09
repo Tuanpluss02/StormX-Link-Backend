@@ -14,6 +14,7 @@ import {
 } from "src/common/dto/pagination.dto";
 import { User } from "src/entities/user.entity";
 import { PasswordUtil } from "src/utils/password-util";
+import { ValidationUtil } from "src/utils/validation.util";
 
 @Injectable()
 export class UserService {
@@ -23,20 +24,27 @@ export class UserService {
 
   async createUser(username: string, password: string): Promise<User> {
     try {
-      const userExist = await this.userModel.findOne({ username });
+      // Validate and sanitize input
+      const sanitizedUsername = ValidationUtil.sanitizeString(username);
+      ValidationUtil.validateUsername(sanitizedUsername);
+      ValidationUtil.validatePassword(password);
+
+      const userExist = await this.userModel.findOne({
+        username: sanitizedUsername,
+      });
       if (userExist) {
         throw new HttpException("User already exists", HttpStatus.BAD_REQUEST);
       }
 
       const hashedPassword = await PasswordUtil.hashPassword(password);
       const newUser = new this.userModel({
-        username,
+        username: sanitizedUsername,
         password: hashedPassword,
         urls: [],
       });
 
       const savedUser = await newUser.save();
-      this.logger.log(`User created: ${username}`);
+      this.logger.log(`User created: ${sanitizedUsername}`);
       return savedUser;
     } catch (error) {
       this.logger.error(`Error creating user: ${error.message}`, error.stack);
@@ -49,7 +57,11 @@ export class UserService {
 
   async userLogin(username: string, password: string): Promise<User> {
     try {
-      const user = await this.userModel.findOne({ username });
+      const sanitizedUsername = ValidationUtil.sanitizeString(username);
+
+      const user = await this.userModel.findOne({
+        username: sanitizedUsername,
+      });
       if (!user) {
         throw new UnauthorizedException("Invalid username or password");
       }
@@ -62,7 +74,7 @@ export class UserService {
         throw new UnauthorizedException("Invalid username or password");
       }
 
-      this.logger.log(`User logged in: ${username}`);
+      this.logger.log(`User logged in: ${sanitizedUsername}`);
       return user;
     } catch (error) {
       this.logger.error(`Error during login: ${error.message}`, error.stack);
@@ -79,6 +91,9 @@ export class UserService {
     newPassword: string,
   ): Promise<{ message: string }> {
     try {
+      // Validate new password
+      ValidationUtil.validatePassword(newPassword);
+
       const user = await this.getUserById(id);
 
       const checkPassword = await PasswordUtil.comparePassword(

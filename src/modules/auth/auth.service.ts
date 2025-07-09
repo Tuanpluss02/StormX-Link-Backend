@@ -2,32 +2,41 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { User } from "src/entities/user.entity";
+import { JwtPayload, AuthTokenResponse } from "src/config/jwt.config";
 import { UserService } from "../user/user.service";
 import { LoginDTO } from "./dto/login.dto";
 import { RegisterDTO } from "./dto/register.dto";
 
-@Injectable({})
+@Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
-  async register(registerDTO: RegisterDTO): Promise<{ accessToken: string }> {
+  async register(registerDTO: RegisterDTO): Promise<AuthTokenResponse> {
     try {
       const { username, password } = registerDTO;
       const newUser = await this.userService.createUser(username, password);
-      const payload = { sub: newUser.id, username: newUser.username };
-      const token = await this.jwtService.signAsync(payload, {
-        expiresIn: process.env.ACCESS_TOKEN_EXPIRES,
-        secret: process.env.SECRET_KEY,
-      });
-      return { accessToken: token };
+
+      const tokenResponse = await this.generateTokenResponse(newUser);
+
+      this.logger.log(`User registered successfully: ${username}`);
+      return tokenResponse;
     } catch (error) {
+      this.logger.error(
+        `Registration failed for ${registerDTO.username}: ${error.message}`,
+        error.stack,
+      );
       throw new HttpException(
         error.message,
         error.status || HttpStatus.INTERNAL_SERVER_ERROR,
@@ -35,17 +44,20 @@ export class AuthService {
     }
   }
 
-  async login(loginDTO: LoginDTO): Promise<{ accessToken: string }> {
+  async login(loginDTO: LoginDTO): Promise<AuthTokenResponse> {
     try {
       const { username, password } = loginDTO;
       const user = await this.userService.userLogin(username, password);
-      const payload = { sub: user.id, username: user.username };
-      const token = await this.jwtService.signAsync(payload, {
-        expiresIn: process.env.ACCESS_TOKEN_EXPIRES,
-        secret: process.env.SECRET_KEY,
-      });
-      return { accessToken: token };
+
+      const tokenResponse = await this.generateTokenResponse(user);
+
+      this.logger.log(`User logged in successfully: ${username}`);
+      return tokenResponse;
     } catch (error) {
+      this.logger.error(
+        `Login failed for ${loginDTO.username}: ${error.message}`,
+        error.stack,
+      );
       throw new HttpException(
         error.message,
         error.status || HttpStatus.INTERNAL_SERVER_ERROR,
@@ -53,11 +65,38 @@ export class AuthService {
     }
   }
 
-  async validateUser(payload: any): Promise<User> {
-    const user = await this.userService.getUserById(payload.sub);
-    if (!user) {
-      throw new UnauthorizedException("User not found");
+  async validateUser(payload: JwtPayload): Promise<User> {
+    try {
+      const user = await this.userService.getUserById(payload.sub);
+      if (!user) {
+        throw new UnauthorizedException("User not found");
+      }
+      return user;
+    } catch (error) {
+      this.logger.error(
+        `Token validation failed for user ${payload.sub}: ${error.message}`,
+        error.stack,
+      );
+      throw new UnauthorizedException("Invalid token");
     }
-    return user;
+  }
+
+  private async generateTokenResponse(user: User): Promise<AuthTokenResponse> {
+    const payload: JwtPayload = {
+      sub: user.id,
+      username: user.username,
+    };
+
+    const expiresIn = this.configService.get<string>(
+      "ACCESS_TOKEN_EXPIRES",
+      "1h",
+    );
+    const accessToken = await this.jwtService.signAsync(payload);
+
+    return {
+      accessToken,
+      tokenType: "Bearer",
+      expiresIn,
+    };
   }
 }
