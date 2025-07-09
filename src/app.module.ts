@@ -4,6 +4,7 @@ import { UserModule } from "./modules/user/user.module";
 import { UrlModule } from "./modules/url/url.module";
 import { HealthModule } from "./modules/health/health.module";
 import { RateLimitModule } from "./modules/rate-limit/rate-limit.module";
+import { CacheConfigModule } from "./modules/cache/cache.module";
 import { MongooseModule } from "@nestjs/mongoose";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
@@ -22,6 +23,7 @@ import { getDatabaseConfig } from "./config/database.config";
       useFactory: getDatabaseConfig,
       inject: [ConfigService],
     }),
+    CacheConfigModule,
     RateLimitModule,
     HealthModule,
     AuthModule,

@@ -11,6 +11,7 @@ import {
   PaginationDto,
   PaginatedResponse,
 } from "src/common/dto/pagination.dto";
+import { CacheService } from "src/modules/cache/cache.service";
 import { UrlCodeGenerator } from "src/utils/url-code-generator";
 import { Url } from "../../entities/url.entity";
 import { NewUrlDTO } from "./dto/new-url.dto";
@@ -20,7 +21,10 @@ import { UpdateUrlDTO } from "./dto/update-url.dto";
 export class UrlService {
   private readonly logger = new Logger(UrlService.name);
 
-  constructor(@InjectModel(Url.name) private readonly urlModel: Model<Url>) {}
+  constructor(
+    @InjectModel(Url.name) private readonly urlModel: Model<Url>,
+    private readonly cacheService: CacheService,
+  ) {}
 
   async createUrl(newUrlDTO: NewUrlDTO, userId?: string): Promise<Url> {
     try {
@@ -59,7 +63,21 @@ export class UrlService {
       const newUrl = new this.urlModel(urlData);
       const savedUrl = await newUrl.save();
 
-      this.logger.log(`URL created: ${urlCode} -> ${newUrlDTO.longUrl}`);
+      // Cache the new URL for faster access
+      await this.cacheService.setUrl(urlCode, {
+        longUrl: savedUrl.longUrl,
+        clickCount: savedUrl.clickCount,
+        lastAccessed: savedUrl.lastAccessed,
+      });
+
+      // Invalidate user stats cache
+      if (userId) {
+        await this.cacheService.invalidateUserCache(userId);
+      }
+
+      this.logger.log(
+        `URL created and cached: ${urlCode} -> ${newUrlDTO.longUrl}`,
+      );
       return savedUrl;
     } catch (error) {
       this.logger.error(`Error creating URL: ${error.message}`, error.stack);
@@ -74,12 +92,34 @@ export class UrlService {
     urlCode: string,
   ): Promise<{ url: string; clickCount: number }> {
     try {
+      // Try to get from cache first
+      const cachedUrl = await this.cacheService.getUrl(urlCode);
+
+      if (cachedUrl) {
+        // Update click count in background (don't await to keep response fast)
+        this.incrementClickCount(urlCode);
+
+        return {
+          url: cachedUrl.longUrl,
+          clickCount: cachedUrl.clickCount + 1,
+        };
+      }
+
+      // If not in cache, get from database
       const url = await this.urlModel.findOne({ urlCode });
       if (!url) {
         throw new NotFoundException("URL not found.");
       }
 
-      // Increment click count and update last accessed
+      // Cache the URL for future requests
+      await this.cacheService.setUrl(urlCode, {
+        longUrl: url.longUrl,
+        clickCount: url.clickCount,
+        lastAccessed: url.lastAccessed,
+      });
+
+      // Increment click count
+      const newClickCount = url.clickCount + 1;
       await this.urlModel.updateOne(
         { urlCode },
         {
@@ -88,12 +128,17 @@ export class UrlService {
         },
       );
 
-      this.logger.log(
-        `URL accessed: ${urlCode} (clicks: ${url.clickCount + 1})`,
-      );
+      // Update cache with new click count
+      await this.cacheService.setUrl(urlCode, {
+        longUrl: url.longUrl,
+        clickCount: newClickCount,
+        lastAccessed: new Date(),
+      });
+
+      this.logger.log(`URL accessed: ${urlCode} (clicks: ${newClickCount})`);
       return {
         url: url.longUrl,
-        clickCount: url.clickCount + 1,
+        clickCount: newClickCount,
       };
     } catch (error) {
       this.logger.error(`Error retrieving URL: ${error.message}`, error.stack);
@@ -101,6 +146,30 @@ export class UrlService {
         error.message,
         error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
+    }
+  }
+
+  private async incrementClickCount(urlCode: string): Promise<void> {
+    try {
+      await this.urlModel.updateOne(
+        { urlCode },
+        {
+          $inc: { clickCount: 1 },
+          $set: { lastAccessed: new Date() },
+        },
+      );
+
+      // Update cache with new click count
+      const cachedUrl = await this.cacheService.getUrl(urlCode);
+      if (cachedUrl) {
+        await this.cacheService.setUrl(urlCode, {
+          ...cachedUrl,
+          clickCount: cachedUrl.clickCount + 1,
+          lastAccessed: new Date(),
+        });
+      }
+    } catch (error) {
+      this.logger.error(`Error incrementing click count: ${error.message}`);
     }
   }
 

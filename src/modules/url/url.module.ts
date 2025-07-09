@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
 import { User, UserSchema } from "src/entities/user.entity";
+import { CacheService } from "src/modules/cache/cache.service";
 import { Url, UrlSchema } from "../../entities/url.entity";
 import { AuthService } from "../auth/auth.service";
 import { JwtStrategy } from "../auth/strategies/jwt.strategy";
@@ -13,7 +14,7 @@ import { UrlService } from "./url.service";
     MongooseModule.forFeature([{ name: Url.name, schema: UrlSchema }]),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
-  providers: [UrlService, JwtStrategy, AuthService, UserService],
+  providers: [UrlService, JwtStrategy, AuthService, UserService, CacheService],
   controllers: [UrlController],
 })
 export class UrlModule {}
