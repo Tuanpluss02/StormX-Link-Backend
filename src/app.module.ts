@@ -2,11 +2,14 @@ import { Module } from "@nestjs/common";
 import { AuthModule } from "./modules/auth/auth.module";
 import { UserModule } from "./modules/user/user.module";
 import { UrlModule } from "./modules/url/url.module";
+import { HealthModule } from "./modules/health/health.module";
+import { RateLimitModule } from "./modules/rate-limit/rate-limit.module";
 import { MongooseModule } from "@nestjs/mongoose";
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 import { LoggingInterceptor } from "./common/interceptors/logging.interceptor";
+import { getDatabaseConfig } from "./config/database.config";
 
 @Module({
   imports: [
@@ -14,9 +17,13 @@ import { LoggingInterceptor } from "./common/interceptors/logging.interceptor";
       isGlobal: true,
       envFilePath: ".env",
     }),
-    MongooseModule.forRoot(process.env.MONGO_URI, {
-      dbName: process.env.MONGO_DB_NAME,
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: getDatabaseConfig,
+      inject: [ConfigService],
     }),
+    RateLimitModule,
+    HealthModule,
     AuthModule,
     UserModule,
     UrlModule,

@@ -8,12 +8,14 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   Res,
   UseGuards,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
+import { PaginationDto } from "src/common/dto/pagination.dto";
 import { JwtGuard } from "src/modules/auth/guards/jwt.guard";
 import { iResponse } from "src/utils/response-handle";
 import { UserService } from "../user/user.service";
@@ -39,8 +41,8 @@ export class UrlController {
     @Req() request: Request,
     @Res() response: Response,
   ) {
-    const newUrl = await this.urlService.createUrl(newUrlDTO);
     const userId = request.user["id"];
+    const newUrl = await this.urlService.createUrl(newUrlDTO, userId);
     const user = await this.userService.getUserById(userId);
     user.urls.push(newUrl.id);
     await user.save();
@@ -68,15 +70,18 @@ export class UrlController {
   @UseGuards(JwtGuard)
   @ApiBearerAuth()
   @ApiConsumes("application/x-www-form-urlencoded")
-  async getAllUrls(@Req() request: Request, @Res() response: Response) {
+  async getAllUrls(
+    @Req() request: Request,
+    @Res() response: Response,
+    @Query() paginationDto: PaginationDto,
+  ) {
     const userId = request.user["id"];
-    const allUserUrl = await this.userService.getAllUrls(userId);
-    allUserUrl.reverse();
+    const result = await this.urlService.getUrlsByUserId(userId, paginationDto);
     return iResponse(
       response,
       HttpStatus.OK,
       "Retrieving all URLs successful.",
-      allUserUrl,
+      result,
     );
   }
 
@@ -92,12 +97,7 @@ export class UrlController {
     @Res() response: Response,
   ) {
     const userId = request.user["id"];
-    const allUserUrl = await this.userService.getAllUrls(userId);
-    const isUrlExist = allUserUrl.find((url) => url._id.toString() === id);
-    if (!isUrlExist) {
-      throw new HttpException("URL not found", HttpStatus.NOT_FOUND);
-    }
-    const result = await this.urlService.updateUrl(id, updateUrlDTO);
+    const result = await this.urlService.updateUrl(id, updateUrlDTO, userId);
     return iResponse(response, HttpStatus.OK, "URL update successful.", result);
   }
 
@@ -111,12 +111,8 @@ export class UrlController {
     @Res() response: Response,
   ) {
     const userId = request.user["id"];
+    await this.urlService.deleteUrl(id, userId);
     const user = await this.userService.getUserById(userId);
-    const isUrlExist = user.urls.find((url) => url.toString() === id);
-    if (!isUrlExist) {
-      throw new HttpException("URL not found", HttpStatus.NOT_FOUND);
-    }
-    await this.urlService.deleteUrl(id);
     user.urls = user.urls.filter((url) => url.toString() !== id);
     await user.save();
     return iResponse(response, HttpStatus.OK, "URL deletion successful.");
